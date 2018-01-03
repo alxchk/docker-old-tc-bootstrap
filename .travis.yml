@@ -1,0 +1,25 @@
+sudo: required
+services:
+- docker
+os:
+- linux
+language:
+- generic
+install:
+- sudo apt-get install -y debootstrap
+script:
+- cd $TRAVIS_BUILD_DIR/$TC && sudo ./bootstrap.sh
+after_success:
+- docker login -u="$DOCKER_USER" -p="$DOCKER_PASS"
+- export REPO=alxchk/docker-old-tc-bootstrap
+- export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH
+  ; fi`
+- cd $TRAVIS_BUILD_DIR/$TC && docker tag $TC alxchk/$TC:$TAG
+- cd $TRAVIS_BUILD_DIR/$TC && docker push alxchk/$TC:$TAG >/dev/null
+env:
+  global:
+  - secure: QOBzhZgmJ1U9Fe3BA6HUV66jzgUJnZ9xC4nVavvDjcJd0cdnyhJnQwsndBIFs7RETWR3JrtQBLw916/oZ0qlx1GwnT+x7h0bGWxEApRX8Bkk7ynz1MMUWV9co8BsY5xfeV+6/DaXROlTyj9tsqJTZ6F4WcXOGsqpnqmlwrwUvpAGV81Te0AsngqSafhT6AahzgiCDvgLNErqEeXCSIcDyjStTV5L1thLcebjhBK0Z4gsf7QDh6tSzRzwabDyg6L7ZfFZ6ICh/JvYVqpB1ShKAEkDsgWd5yvpIiuB3umFWI+yd/fXFSTl2xMAZIayfriAAsHN+G9+JWKnSUCIGMgNwvzMdezxwzEqUlWXce6wXjPi8Ed80O7fPpLaatHBzFydnHjRr0xGhexckGb1KLvgCFfSmVL9Mp4zaIp2uRyGmjcH9hPo8sk7Yfzb5wvH91SUmfHwENntkarXEXJF6MB8JP02YcjXx5QHm7QwBcJB3GyYTnArjc1RClSwxrriky8LL6bM8MLlV2b92YCHRt6kvUTIvPXHBxQw3cwQVuOzbfmde3JE7ZkTwMpUhTKrnnONmUYqzG1Akxh/jix2siN/g5a1ehD5nPYiA1b16EXaF9T2z6UEARciwjr2g1ueeyF/XsB4X684aOzDBbxeFJ8my6LZw9g9nV3GsbaaC3m1Ex8=
+  - secure: frwyMDNjjZ+VMKNSXCzKSO2C2ZO3Mr2aTFLmHF/ASFjeYKGS0L+MDCNrDmnpEeiKKqF7iDu061XSHErQ8Geucn/4Wo5eY/fHvQ63Slmkd2x7lp37SfqKBUok317JgO8KUPF5GKKCixBeP4vtyOfdl14xpYShl5ZHEyQm9qjnPcNCJcaaLOLUotiM7TOJWfcXTIYig3G8ZzUrUHY7CJws8W33pl+2cz+pj235D5EGg4CK5/tNgaiSRDscnXXzqz459JccER+bobopgMuq+BP4pK0LtjimzTEvwL/a+lvfoVDg+UStiApMbjLYkaOirGaINfqrw5yqwLQRGEYtXTBtWmHTojGMFYizxVS1daRUlUgysH2IS9pE5EO8dsC30CILriJRkSqOGgQgSJEu58HhKee72GLUmvnDvI4NXeE/nJmWnhZxX40QZfTY+uCOoPmtRC6uQ1buoke2D754AI8QvLSH6/AdBHdFZoDgkmvz7pe277X/QBm1DGdRU80qkFguzdKw9jA6Eb963s0VpEtnGELzi/ZMxqSveKd4Ld+H9dLv3S4Q2ylcIEnrBD5wnGo8OjOi0V7uKcoT3uE5ozkU4xJ+Dr1C9kRxxvPG0Wqg+H8Az9Pkc7J3LFrq9NJYgniwty7yap1cW9T2j0ZsOf5ZrZHLjgdcDBuhlCSupIxIfGM=
+  matrix:
+  - TC=linux32
+  - TC=linux64
