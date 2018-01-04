@@ -69,7 +69,7 @@ export TERM=
 export DEBIAN_FRONTEND=noninteractive
 /bin/sh -c "apt-get --force-yes -y install gcc-3.0 make libc-dev \
  perl m4 gettext libexpat1-dev flex bison file libstdc++2.10-dev \
- libtool patch xutils xlibs-dev < /dev/null"
+ libtool patch xutils xlibs-dev zip unzip < /dev/null"
 
 cd /
 gcc -fPIC -o /wrap.so -shared /wrap.c
