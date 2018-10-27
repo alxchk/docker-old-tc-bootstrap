@@ -79,7 +79,7 @@ export DEBIAN_FRONTEND=noninteractive
 
 /bin/sh -c "apt-get --force-yes -y install build-essential make libc-dev \
  perl m4 gettext libexpat1-dev flex bison file libtool patch xutils \
- libx11-dev libxss-dev zip unzip libattr1-dev < /dev/null"
+ libx11-dev libxss-dev zip unzip libattr1-dev libasound2-dev < /dev/null"
 
 cd /
 gcc -fPIC -o /wrap.so -shared /wrap.c
