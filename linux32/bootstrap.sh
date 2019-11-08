@@ -67,7 +67,7 @@ cat <<__CMDS__ > $LIN32/deploy.sh
 export LC_ALL=C
 export TERM=
 export DEBIAN_FRONTEND=noninteractive
-/bin/sh -c "apt-get --force-yes -y install gcc-3.0 make libc-dev \
+/bin/sh -c "apt-get --force-yes -y install gcc-3.0 g++-3.0 make libc-dev \
  perl m4 gettext libexpat1-dev flex bison file libstdc++2.10-dev \
  libtool patch xutils xlibs-dev zip unzip attr-dev < /dev/null"
 
@@ -76,11 +76,17 @@ gcc -fPIC -o /wrap.so -shared /wrap.c
 echo /wrap.so >/etc/ld.so.preload
 
 mkdir /opt/static
+
 ln -sf /usr/lib/gcc-lib/i386-linux/3.0.4/libgcc.a /opt/static/
+ln -sf /usr/lib/gcc-lib/i386-linux/3.0.4/libstdc++.a /opt/static/
+ln -sf /usr/lib/gcc-lib/i386-linux/3.0.4/libsupc++.a /opt/static/
+
 ln -sf /usr/lib/libffi.a /opt/static/
 ln -sf /usr/lib/libutil.a /opt/static/
 ln -sf /usr/bin/gcc-3.0 /usr/bin/gcc
+ln -sf /usr/bin/g++-3.0 /usr/bin/g++
 ln -sf /usr/bin/gcc-3.0 /usr/bin/cc
+ln -sf /usr/lib/gcc-lib/i386-linux/3.0.4/cc1plus /usr/bin/cc1plus
 ln -sf /usr/X11R6/lib/libX11.so /usr/lib/
 ln -sf /usr/X11R6/lib/libXss.a /usr/lib/
 apt-get clean
