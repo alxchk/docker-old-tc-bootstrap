@@ -6,7 +6,7 @@ os:
 language:
 - generic
 install:
-- sudo apt-get install -y debootstrap
+- sudo apt-get install -y debootstrap binfmt-support qemu-user-static
 script:
 - cd $TRAVIS_BUILD_DIR/$TC && sudo ./bootstrap.sh
 after_success:
