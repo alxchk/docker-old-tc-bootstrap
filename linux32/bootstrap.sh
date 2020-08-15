@@ -67,6 +67,9 @@ cat <<__CMDS__ > $LIN32/deploy.sh
 export LC_ALL=C
 export TERM=
 export DEBIAN_FRONTEND=noninteractive
+
+set -e
+
 /bin/sh -c "apt-get --force-yes -y install gcc-3.0 g++-3.0 make libc-dev \
  perl m4 gettext libexpat1-dev flex bison file libstdc++2.10-dev \
  libtool patch xutils xlibs-dev zip unzip attr-dev locales < /dev/null"
@@ -89,6 +92,7 @@ ln -sf /usr/bin/gcc-3.0 /usr/bin/cc
 ln -sf /usr/lib/gcc-lib/i386-linux/3.0.4/cc1plus /usr/bin/cc1plus
 ln -sf /usr/X11R6/lib/libX11.so /usr/lib/
 ln -sf /usr/X11R6/lib/libXss.a /usr/lib/
+
 apt-get clean
 
 localedef -i en_US -f UTF-8 en_US.UTF-8
@@ -110,4 +114,4 @@ chroot $LIN32 /bin/bash -x /deploy.sh
 umount $LIN32/proc
 umount $LIN32/dev
 
-tar -C $LIN32 -c . | docker import - linux32
+tar -C $LIN32 -c . | ${DOCKER_COMMAND:-docker} import - linux32

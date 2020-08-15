@@ -77,6 +77,8 @@ export LC_ALL=C
 export TERM=
 export DEBIAN_FRONTEND=noninteractive
 
+set -e
+
 /bin/sh -c "apt-get --force-yes -y install build-essential make libc-dev locales \
  perl m4 gettext libexpat1-dev flex bison file libtool patch xutils \
  libx11-dev libxss-dev zip unzip libattr1-dev libasound2-dev < /dev/null"
@@ -86,6 +88,7 @@ gcc -fPIC -o /wrap.so -shared /wrap.c
 echo /wrap.so >/etc/ld.so.preload
 
 mkdir /opt/static
+
 ln -sf /usr/lib/gcc/x86_64-linux-gnu/4.1.2/libgcc.a /opt/static
 ln -sf /usr/lib/gcc/x86_64-linux-gnu/4.1.2/libssp.a /opt/static
 ln -sf /usr/lib/gcc/x86_64-linux-gnu/4.1.2/libssp_nonshared.a /opt/static
@@ -110,4 +113,4 @@ chroot $LIN64 /bin/bash -x /deploy.sh
 umount $LIN64/proc
 umount $LIN64/dev
 
-tar -C $LIN64 -c . | docker import - linux64
+tar -C $LIN64 -c . | ${DOCKER_COMMAND:-docker} import - linux64

@@ -15,7 +15,7 @@ after_success:
 - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH
   ; fi`
 - cd $TRAVIS_BUILD_DIR/$TC && docker tag $TC alxchk/$TC:$TAG
-- cd $TRAVIS_BUILD_DIR/$TC && docker push alxchk/$TC:$TAG >/dev/null
+- cd $TRAVIS_BUILD_DIR/$TC && docker push alxchk/$TC:$TAG >/dev/null && echo "Pushed alxchk/$TC:$TAG"
 env:
   global:
   - secure: QOBzhZgmJ1U9Fe3BA6HUV66jzgUJnZ9xC4nVavvDjcJd0cdnyhJnQwsndBIFs7RETWR3JrtQBLw916/oZ0qlx1GwnT+x7h0bGWxEApRX8Bkk7ynz1MMUWV9co8BsY5xfeV+6/DaXROlTyj9tsqJTZ6F4WcXOGsqpnqmlwrwUvpAGV81Te0AsngqSafhT6AahzgiCDvgLNErqEeXCSIcDyjStTV5L1thLcebjhBK0Z4gsf7QDh6tSzRzwabDyg6L7ZfFZ6ICh/JvYVqpB1ShKAEkDsgWd5yvpIiuB3umFWI+yd/fXFSTl2xMAZIayfriAAsHN+G9+JWKnSUCIGMgNwvzMdezxwzEqUlWXce6wXjPi8Ed80O7fPpLaatHBzFydnHjRr0xGhexckGb1KLvgCFfSmVL9Mp4zaIp2uRyGmjcH9hPo8sk7Yfzb5wvH91SUmfHwENntkarXEXJF6MB8JP02YcjXx5QHm7QwBcJB3GyYTnArjc1RClSwxrriky8LL6bM8MLlV2b92YCHRt6kvUTIvPXHBxQw3cwQVuOzbfmde3JE7ZkTwMpUhTKrnnONmUYqzG1Akxh/jix2siN/g5a1ehD5nPYiA1b16EXaF9T2z6UEARciwjr2g1ueeyF/XsB4X684aOzDBbxeFJ8my6LZw9g9nV3GsbaaC3m1Ex8=
