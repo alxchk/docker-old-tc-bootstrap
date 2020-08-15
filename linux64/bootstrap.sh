@@ -77,7 +77,7 @@ export LC_ALL=C
 export TERM=
 export DEBIAN_FRONTEND=noninteractive
 
-/bin/sh -c "apt-get --force-yes -y install build-essential make libc-dev \
+/bin/sh -c "apt-get --force-yes -y install build-essential make libc-dev locales \
  perl m4 gettext libexpat1-dev flex bison file libtool patch xutils \
  libx11-dev libxss-dev zip unzip libattr1-dev libasound2-dev < /dev/null"
 
@@ -90,6 +90,8 @@ ln -sf /usr/lib/gcc/x86_64-linux-gnu/4.1.2/libgcc.a /opt/static
 ln -sf /usr/lib/gcc/x86_64-linux-gnu/4.1.2/libssp.a /opt/static
 ln -sf /usr/lib/gcc/x86_64-linux-gnu/4.1.2/libssp_nonshared.a /opt/static
 ln -sf /usr/lib/libffi.a /opt/static/
+
+localedef -i en_US -f UTF-8 en_US.UTF-8
 
 rm -f /wrap.c
 rm -f /deploy.sh

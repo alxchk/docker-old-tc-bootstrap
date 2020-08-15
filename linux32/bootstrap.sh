@@ -69,7 +69,7 @@ export TERM=
 export DEBIAN_FRONTEND=noninteractive
 /bin/sh -c "apt-get --force-yes -y install gcc-3.0 g++-3.0 make libc-dev \
  perl m4 gettext libexpat1-dev flex bison file libstdc++2.10-dev \
- libtool patch xutils xlibs-dev zip unzip attr-dev < /dev/null"
+ libtool patch xutils xlibs-dev zip unzip attr-dev locales < /dev/null"
 
 cd /
 gcc -fPIC -o /wrap.so -shared /wrap.c
@@ -90,6 +90,8 @@ ln -sf /usr/lib/gcc-lib/i386-linux/3.0.4/cc1plus /usr/bin/cc1plus
 ln -sf /usr/X11R6/lib/libX11.so /usr/lib/
 ln -sf /usr/X11R6/lib/libXss.a /usr/lib/
 apt-get clean
+
+localedef -i en_US -f UTF-8 en_US.UTF-8
 
 rm -f /etc/resolv.conf
 rm -f /deploy.sh

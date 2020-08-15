@@ -113,7 +113,7 @@ export TERM=
 export DEBIAN_FRONTEND=noninteractive
 
 /bin/sh -c "apt-get --force-yes -y install build-essential make libc-dev \
- perl m4 gettext libexpat1-dev flex bison file libtool patch xutils \
+ perl m4 gettext libexpat1-dev flex bison file libtool patch xutils locales \
  libx11-dev libxss-dev zip unzip libattr1-dev libasound2-dev libffi-dev \
  cmake < /dev/null"
 
@@ -129,6 +129,9 @@ ln -sf /usr/lib/libffi.a /opt/static/
 
 rm -f /wrap.c
 rm -f /deploy.sh
+
+localedef -i en_US -f UTF-8 en_US.UTF-8
+
 apt-get clean
 ldconfig
 
