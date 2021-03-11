@@ -1,0 +1,25 @@
+FROM debian:buster-wine
+
+# setup wine
+ENV \
+    WINEARCH=win64 \
+    WINEPREFIX=/opt/win \
+    WINEPATH=C:\\tools\\bin \
+    WINEDEBUG=-all
+
+RUN \
+    winetricks win10 && \
+    winetricks -q dotnet472 && \
+    winetricks win10
+
+# install which in wine (for easy path debugging)
+RUN \
+    mkdir -p $WINEPREFIX/drive_c/tools/bin && \
+    wget http://downloads.sourceforge.net/gnuwin32/which-2.20-bin.zip -O $HOME/which.zip && \
+    cd "$WINEPREFIX/drive_c/tools" && \
+    unzip $HOME/which.zip && \
+    rm $HOME/which.zip && \
+    wine which --version
+
+ENTRYPOINT [ "/usr/bin/wine64", "cmd", "/c" ]
+CMD [ "cmd" ]

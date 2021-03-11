@@ -1,0 +1,3 @@
+[submodule "windows/MSVCDocker"]
+	path = windows/MSVCDocker
+	url = https://github.com/alxchk/MSVCDocker

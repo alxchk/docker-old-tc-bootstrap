@@ -1,0 +1,62 @@
+ARG WINE_VER=debian
+FROM wine:$WINE_VER
+USER root
+
+# vcwine
+RUN mkdir /etc/vcwine && \
+    touch /etc/vcwine/vcvars32 && \
+    touch /etc/vcwine/vcvars64
+
+ADD dockertools/vcwine /usr/local/bin/vcwine
+
+# bring over the msvc snapshots
+ARG MSVC=15
+ENV MSVC=$MSVC
+ADD build/msvc$MSVC/snapshots /snapshots
+
+RUN ls -la $HOME
+RUN ls -la /snapshots/*
+
+# import the msvc snapshot files
+RUN cd $WINEPREFIX/drive_c && \
+    unzip -n /snapshots/CMP/files.zip
+RUN cd $WINEPREFIX/drive_c && mkdir -p Windows && \
+    cd $WINEPREFIX/drive_c/Windows && mkdir -p INF System32 SysWOW64 WinSxS && \
+    mv INF      inf && \
+    mv System32 system32 && \
+    mv SysWOW64 syswow64 && \
+    mv WinSxS   winsxs && \
+    cd $WINEPREFIX/drive_c && \
+    cp -R $WINEPREFIX/drive_c/Windows/* $WINEPREFIX/drive_c/windows && \
+    rm -rf $WINEPREFIX/drive_c/Windows
+
+# import msvc environment snapshot
+ADD dockertools/diffenv diffenv
+RUN ./diffenv $PWD/snapshots/SNAPSHOT-01/env.txt $PWD/snapshots/SNAPSHOT-02/vcvars32.txt /etc/vcwine/vcvars32
+RUN ./diffenv $PWD/snapshots/SNAPSHOT-01/env.txt $PWD/snapshots/SNAPSHOT-02/vcvars64.txt /etc/vcwine/vcvars64
+RUN rm diffenv
+
+# clean up
+RUN rm -rf /snapshots
+
+# 64-bit linking has trouble finding cvtres, so help it out
+RUN find $WINEPREFIX -iname x86_amd64 | xargs -Ifile cp "file/../cvtres.exe" "file"
+
+# workaround bugs in wine's cmd that prevents msvc setup bat files from working
+ADD dockertools/hackvcvars /hackvcvars
+RUN find $WINEPREFIX/drive_c -iname v[cs]\*.bat | xargs -Ifile /hackvcvars "file" && \
+    find $WINEPREFIX/drive_c -iname win\*.bat | xargs -Ifile /hackvcvars "file" && \
+    rm /hackvcvars
+
+# fix inconsistent casing in msvc filenames
+RUN find $WINEPREFIX -name Include -execdir mv Include include \; || \
+    find $WINEPREFIX -name Lib -execdir mv Lib lib \; || \
+    find $WINEPREFIX -name \*.Lib -execdir rename 'y/A-Z/a-z/' '{}' \;
+
+# reboot for luck
+RUN winetricks win10 && wineboot -r
+
+# entrypoint
+ENV MSVCARCH=64
+ADD dockertools/vcentrypoint /usr/local/bin/vcentrypoint
+ENTRYPOINT [ "/usr/local/bin/vcentrypoint" ]

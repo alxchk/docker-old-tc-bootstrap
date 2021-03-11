@@ -3,19 +3,31 @@
 set -x
 set -e
 
-SELF=`readlink -f "$0"`
-LIN64=`dirname "$SELF"`/rootfs
-debootstrap --no-check-gpg --arch amd64 etch $LIN64 http://archive.debian.org/debian
+DIST=${DIST:-etch}
+ARCH=${ARCH:-amd64}
 
-mkdir -p $LIN64/etc/ssl/certs
+SELF=`readlink -f "$0"`
+ROOTFS=`dirname "$SELF"`/rootfs-${DIST}-${ARCH}
+
+case ${ARCH} in
+    amd64) UNAME_ARCH="x86_64";;
+    i386) UNAME_ARCH="i486";;
+    armhf) UNAME_ARCH="armv7l";;
+    *) UNAME_ARCH=${ARCH};;
+esac
+
+debootstrap --no-check-gpg --arch ${ARCH} ${DIST} ${ROOTFS} \
+	    http://archive.debian.org/debian
+
+mkdir -p ${ROOTFS}/etc/ssl/certs
 for file in /etc/ssl/certs/*.0; do
-    cat $file >$LIN64/etc/ssl/certs/`basename "$file"`
+    cat $file >${ROOTFS}/etc/ssl/certs/`basename "$file"`
 done
 
-cp /etc/ssl/certs/ca-* $LIN64/etc/ssl/certs/
-cat /etc/resolv.conf >$LIN64/etc/resolv.conf
+cp /etc/ssl/certs/ca-* ${ROOTFS}/etc/ssl/certs/
+cat /etc/resolv.conf >${ROOTFS}/etc/resolv.conf
 
-cat > $LIN64/wrap.c <<EOF
+cat > ${ROOTFS}/wrap.c <<EOF
 #define _GNU_SOURCE
 #include <sys/utsname.h>
 #include <string.h>
@@ -26,7 +38,7 @@ struct utsname Build_utsname = {
   .nodename = "Build",
   .release = "2.4.0",
   .version = "2.4.0",
-  .machine = "x86_64",
+  .machine = "${UNAME_ARCH}",
   .domainname = "Build",
 };
 
@@ -36,7 +48,7 @@ int uname(struct utsname *buf) {
 }
 EOF
 
-cat > $LIN64/gccwrap <<EOF
+cat > ${ROOTFS}/gccwrap <<EOF
 #!/bin/bash
 declare -a filter=( "\$CFLAGS_FILTER" )
 declare -a badargs=( "\$CFLAGS_ABORT" )
@@ -67,9 +79,9 @@ done
 exec gcc "\${outargs[@]}"
 EOF
 
-chmod +x $LIN64/gccwrap
+chmod +x ${ROOTFS}/gccwrap
 
-cat <<__CMDS__ > $LIN64/deploy.sh
+cat <<__CMDS__ > ${ROOTFS}/deploy.sh
 
 set -x
 
@@ -89,28 +101,38 @@ echo /wrap.so >/etc/ld.so.preload
 
 mkdir /opt/static
 
-ln -sf /usr/lib/gcc/x86_64-linux-gnu/4.1.2/libgcc.a /opt/static
-ln -sf /usr/lib/gcc/x86_64-linux-gnu/4.1.2/libssp.a /opt/static
-ln -sf /usr/lib/gcc/x86_64-linux-gnu/4.1.2/libssp_nonshared.a /opt/static
-ln -sf /usr/lib/libffi.a /opt/static/
+find /usr -noleaf \
+     \( -name libgcc.a \
+        -or -name libssp\*.a \) \
+     \! -path "*/gcc/*32/*" \
+     \! -path "*/gcc/*64/*" \
+     -exec ln -vsf '{}' /opt/static/ ';'
 
 localedef -i en_US -f UTF-8 en_US.UTF-8
 
-rm -f /wrap.c
-rm -f /deploy.sh
 apt-get clean
 ldconfig
 
+rm -f /wrap.c
+rm -f /deploy.sh
+
 __CMDS__
 
-mkdir -p $LIN64/proc
-mkdir -p $LIN64/dev
-mount -t proc proc $LIN64/proc
-mount -t devtmpfs devtmpfs $LIN64/dev
+mkdir -p ${ROOTFS}/proc
+mkdir -p ${ROOTFS}/dev
+mount -t proc proc ${ROOTFS}/proc
+mount -t devtmpfs devtmpfs ${ROOTFS}/dev
 
-chroot $LIN64 /bin/bash -x /deploy.sh
+chroot ${ROOTFS} /bin/bash -x /deploy.sh
 
-umount $LIN64/proc
-umount $LIN64/dev
+umount ${ROOTFS}/proc
+umount ${ROOTFS}/dev
 
-tar -C $LIN64 -c . | ${DOCKER_COMMAND:-docker} import - linux64
+chown root:root -R ${ROOTFS}
+
+tar -C ${ROOTFS} -c . | \
+    ${DOCKER_COMMAND:-docker} import \
+			      --change ENV=DIST=${DIST} \
+			      --change ENV=ARCH=${ARCH} \
+			      --change ENV=UNAME_ARCH=${UNAME_ARCH} \
+			      - linux-${ARCH}:${DIST}

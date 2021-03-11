@@ -102,6 +102,7 @@ rm -f /deploy.sh
 rm -f /wrap.c
 
 ldconfig
+
 __CMDS__
 
 mkdir -p $LIN32/proc
@@ -114,4 +115,10 @@ chroot $LIN32 /bin/bash -x /deploy.sh
 umount $LIN32/proc
 umount $LIN32/dev
 
-tar -C $LIN32 -c . | ${DOCKER_COMMAND:-docker} import - linux32
+chown root:root -R $LIN32
+
+tar -C $LIN32 -c . | \
+    ${DOCKER_COMMAND:-docker} import \
+			      --change ENV=DIST=woody \
+			      --change ENV=ARCH=i386 \
+			      - linux-i386:woody
