@@ -56,6 +56,11 @@ RUN find $WINEPREFIX -name Include -execdir mv Include include \; || \
 # reboot for luck
 RUN winetricks win10 && wineboot -r
 
+RUN \
+    find /opt/win -iname "*t?mp*" -or -iname "*cache*" -or -iname "*ngen*" | xargs rm -rf && \
+    rm -rf $WINEPREFIX/drive_c/windows/assembly && \
+    mkdir -p $WINEPREFIX/drive_c/users/root/Temp $WINEPREFIX/drive_c/windows/Temp 
+
 # entrypoint
 ENV MSVCARCH=64
 ADD dockertools/vcentrypoint /usr/local/bin/vcentrypoint

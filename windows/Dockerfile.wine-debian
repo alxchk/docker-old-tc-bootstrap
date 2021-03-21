@@ -10,7 +10,8 @@ ENV \
 RUN \
     winetricks win10 && \
     winetricks -q dotnet472 && \
-    winetricks win10
+    winetricks win10 && \
+    find $WINEPREFIX -iname "*t?mp*" -or -iname "*cache*" -or -iname "*ngen*" | xargs rm -rf 
 
 # install which in wine (for easy path debugging)
 RUN \
